@@ -1,3 +1,9 @@
+# OS garbages
+**/desktop.ini
+**/.DS_Store
+*.swp
+*.~
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -52,3 +58,9 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# IDEA files
+.idea/**
+**/.idea/
+/local.properties
+**/*.iml
