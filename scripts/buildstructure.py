@@ -29,7 +29,11 @@ class TaggerFrame():
         # 1. take no parameters
         # (use self.sentences and self.tokens())
         # 2. return a list or an iterable which has len of # number of tokens
-        self.feature_functions = [self.postags, self.first_word, self.brown_100]
+        self.feature_functions = [self.postags, 
+                                  self.first_word, 
+                                  self.brown_100,
+                                  self.is_banana,
+                                  self.greater_ave_length]
 
     def read(self, input_filename):
         """load sentences in data file"""
@@ -213,44 +217,37 @@ class TaggerFrame():
                     word_list.append(s + cluster_dict[w])
                 except KeyError:
                     word_list.append(s + "NONE")
-        # self.infile.seek(0)
-        # for line in self.infile:
-        # if line != '\n':
-        #         word_list.append(cluster_dict[line.split('\t')[1]])
         return word_list
 
     def greater_ave_length(self):
         """Calculates the average length of words in the corpus, then for each
         word checks if it is longer than the average length or not."""
-        # TODO need to revise to use self.sentences
         word_list = []
-        self.infile.seek(0)
-        for line in self.infile:
-            if line != '\n':
-                word_list.append(line.split('\t')[1])
         total = 0
-        for word in word_list:
-            total += len(word)
-        average = total / len(word_list)
-        output_list = []
-        for word in word_list:
-            if len(word) > average:
-                output_list.append(True)
-            else:
-                output_list.append(False)
-        return output_list
+        num_words = 0
+        for sent in self.sentences:
+            num_words += len(sent)
+            for w, _, _ in sent:
+                total += len(w)
+        average = total / num_words
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if len(w) > average:
+                    word_list.append(">_ave_length")
+                else:
+                    word_list.append("<=_ave_length")
+        return word_list
 
     def is_banana(self):
         """Checks to see if a word is 'banana' or not."""
-        # TODO need to revise to use self.sentences
         word_list = []
-        self.infile.seek(0)
-        for line in self.infile:
-            if line != '\n':
-                if line.split('\t')[1].lower() == 'banana':
-                    word_list.append(True)
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if w.lower() == 'banana':
+                    word_list.append("banana")
                 else:
-                    word_list.append(False)
+                    word_list.append("not_banana")
+        return word_list
 
 class NamedEntityReconizer(object):
     """
