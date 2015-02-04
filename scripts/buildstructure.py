@@ -7,6 +7,7 @@ WRITE SOMETHING
 
 CS137B, programming assignment #1, Spring 2015
 """
+import re
 import sys
 
 __author__ = ""
@@ -23,46 +24,62 @@ class TaggerFrame():
     """TaggerFrame is a framework for tagging tokens from data file"""
 
     def __init__(self):
+        # sentences is a list of triples [(word, postag, biotag)]
+        # if bio is not given (raw file) third elements are empty strings
         self.sentences = None
 
         # all feature_functions should
         # 1. take no parameters
         # (use self.sentences and self.tokens())
         # 2. return a list or an iterable which has len of # number of tokens
-        self.feature_functions = [self.postags, 
-                                  self.first_word, 
+        self.feature_functions = [self.postags,
+                                  self.first_word,
+                                  self.zone,
+                                  self.brown_50,
                                   self.brown_100,
-                                  self.is_banana,
-                                  self.greater_ave_length]
+                                  self.brown_150,
+                                  self.brown_200,
+                                  self.brown_250,
+                                  self.brown_300,
+                                  self.brown_400,
+                                  self.brown_500,
+                                  self.brown_600,
+                                  self.brown_700,
+                                  self.brown_800,
+                                  self.brown_900,
+                                  self.brown_1000, 
+                                  self.greater_ave_length
+        ]
 
     def read(self, input_filename):
-        """load sentences in data file"""
+        """load sentences from data file"""
         sentences = []
         sentence = []
         with open(input_filename) as in_file:
             for line in in_file:
                 if line == "\n":
-                    sentences.append(sentence)
-                    sentence = []
+                    if not prev_empty:
+                        sentences.append(sentence)
+                        sentence = []
+                    prev_empty = True
                 else:
-                    try: 
+                    try:
                         sentence.append((line.split("\t")[1].strip(),
                                          line.split("\t")[2].strip(),
                                          line.split("\t")[3].strip()))
-                    except:
+                    except IndexError:
                         sentence.append((line.split("\t")[1].strip(),
                                          line.split("\t")[2].strip(), ""))
+                    prev_empty = False
         self.sentences = sentences
 
     def tokens(self):
-        """Return a list of all tokens"""
+        """Return a list of all tokens with their index in the sent they're belong"""
         token_list = []
         for sent in self.sentences:
             for w_index, (word, _, _) in enumerate(sent):
                 token_list.append((str(w_index), word))
         return token_list
-        # return zip(range(len(self.sentences)),
-        #            [w for sentence in self.sentences for (w, _, _) in sentence])
 
     def postags(self):
         """Return a list of all pos tags (in order)"""
@@ -93,18 +110,18 @@ class TaggerFrame():
         for i, (w_index, word) in enumerate(self.tokens()):
             features[i] = [w_index, word]
 
-        # add gold bio tags in training
+        # add gold bio tags while training
         if train:
             self.feature_functions.append(self.biotags)
         # traverse functions
-        # note that all function should take no parameter and return an iterable 
+        # note that all function should take no parameter and return an iterable
         # which has length of the number of total tokens
         for fn in self.feature_functions:
             for num, feature in enumerate(fn()):
                 features[num].append(feature)
-                
+
         # remove gold tags when it's done
-        if train: 
+        if train:
             self.feature_functions.remove(self.biotags)
         return features
 
@@ -158,7 +175,7 @@ class TaggerFrame():
                 word_list.append(t)
                 word_list.extend([f] * (len(sent) - 1))
         return word_list
-
+    
     def brown_50(self):
         return self.brown_cluster(50)
 
@@ -218,6 +235,36 @@ class TaggerFrame():
                 except KeyError:
                     word_list.append(s + "NONE")
         return word_list
+    
+    def zone(self):
+        tag = []
+        ZONE = "zone="
+        txt_zone = "TXT"
+        title_zone = "HL"
+        byline_zone = "DATELINE"
+        dd_zone = "DD"
+        zone = -1
+        for sent in self.sentences:
+            nyt = re.search(r"NYT[0-9]{8}", sent[0][0])
+            if nyt:
+                zone = 3
+            if re.search(r"APW[0-9]{8}", sent[0][0]):
+                zone = 2
+            for w, _, _ in sent:
+                if zone == 2:
+                    tag.append(byline_zone)
+                elif zone == 1:
+                    tag.append(dd_zone)
+                elif zone == 0:
+                    tag.append(title_zone)
+                else:
+                    tag.append(txt_zone)
+            if nyt:
+                zone -= 2
+            else: 
+                zone -= 1
+        return tag
+            
 
     def greater_ave_length(self):
         """Calculates the average length of words in the corpus, then for each
@@ -245,8 +292,8 @@ class TaggerFrame():
             for w, _, _ in sent:
                 if w.lower() == 'banana':
                     word_list.append("banana")
-                else:
-                    word_list.append("not_banana")
+            else:
+                word_list.append("not_banana")
         return word_list
 
 class NamedEntityReconizer(object):
@@ -317,24 +364,29 @@ if __name__ == '__main__':
         help="name of train set file",
         default=os.path.join(PROJECT_PATH, 'dataset', 'train.gold')
     )
-    # parser.add_argument(
-    #     "-o",
-    #     help="name of a file to print out extracted features",
-    #     default=os.path.join(PROJECT_PATH, 'result', 'output.txt')
-    # )
     parser.add_argument(
         "-t",
         help="name of target file, if not given, program will ask users after training",
         default=None
     )
     args = parser.parse_args()
+    
     ner = NamedEntityReconizer()
     ner.train(args.i)
     if args.t is None:
-        # TODO write input() to get target file name
-        target = input("enter file name with its full path: ")
-        pass
+        try:
+            target = input(
+                "enter a test file name with its path\
+                (relative or full, default: dataset/dev.raw): ")
+        except SyntaxError:
+            target = "../dataset/dev.raw"
     else:
         target = args.t
     ner.classify(target)
+    
+    # run eval code
+    testfile = target.split("/")[-1].split(".")[0]
+    os.system(
+        'python scripts/evaluate-head.py "dataset/%s.gold" "result/result.txt"'
+        % testfile)
 
