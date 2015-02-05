@@ -120,7 +120,10 @@ class TaggerFrame():
             for i in range(len(self.feature_functions) + 2): # +2 for default features (word position, word itself)
                 template.write("U%s0:%%x[0,%s]\n" % (str(i), str(i)))
                 # TODO add up the rest of template in a separate file (bigram, etc)
-
+            #with open("template_addendum.txt", "r") as temp:
+            #    for line in temp:
+            #        template.write(line)
+            
     def get_features(self, train=True):
         """traverse function list and get all values in a dictionary"""
         features = {}
