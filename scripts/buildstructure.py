@@ -37,6 +37,7 @@ class TaggerFrame():
                                   # let's stick to these few first functions
                                   # so that we can stabilize template file
                                   # fixed: (w_index word pos zone)
+                                  self.bias,
                                   self.first_word,
                                   self.brown_50,
                                   self.brown_100,
@@ -94,17 +95,21 @@ class TaggerFrame():
 
     def feature_matrix(self, filename, train=True):
         """use this method to get all feature values and printed out as a file"""
-        outf = open(filename, "w")
+        with open(filename, "w") as outf, \
+                open(os.path.join("result", "template"), "w") as template:
 
-        features = self.get_features(train)
-        for tok_index in range(len(features)):
-            outf.write("\t".join(features[tok_index]) + "\n")
-            try:
-                if features[tok_index+1][0] == "0":
-                    outf.write("\n")
-            except KeyError:
-                pass
-        outf.close()
+            features = self.get_features(train)
+            for tok_index in range(len(features)):
+                outf.write("\t".join(features[tok_index]) + "\n")
+                try:
+                    if features[tok_index+1][0] == "0":
+                        outf.write("\n")
+                except KeyError:
+                    pass
+            template.write("# unigram")
+            for i in range(len(self.feature_functions) + 2): # +2 for default features (word position, word itself)
+                template.write("U%s0:%%x[0,%s]\n" % (str(i), str(i)))
+                # TODO add up the rest of template in a separate file (bigram, etc)
 
     def get_features(self, train=True):
         """traverse function list and get all values in a dictionary"""
@@ -168,6 +173,10 @@ class TaggerFrame():
     # currently not used
     ########################################
 
+
+    def bias(self):
+        return ["bias"] * len(self.tokens())
+        
     def first_word(self):
         """Checks for each word if it is the first word in a sentence"""
         word_list = []
@@ -382,7 +391,7 @@ if __name__ == '__main__':
                 "enter a test file name with its path\
                 (relative or full, default: dataset/dev.raw): ")
         except SyntaxError:
-            target = "../dataset/dev.raw"
+            target = "dataset/dev.raw"
     else:
         target = args.t
     ner.classify(target)
