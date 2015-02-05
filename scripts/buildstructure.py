@@ -39,16 +39,19 @@ class TaggerFrame():
                                   # fixed: (w_index word pos zone)
                                   self.bias,
                                   self.first_word,
-                                  self.initcap_period,
-                                  self.one_cap(),
-                                  self.allcap_period(),
-                                  self.contain_digit(),
+                                  self.initcap,
+                                  self.one_cap,
+                                  self.allcap,
+                                  self.contain_digit,
                                   self.two_digit,
                                   self.four_digit,
                                   self.digit_period,
                                   self.digit_slash,
                                   self.dollar,
                                   self.percent,
+                                  self.greater_ave_length,
+                                  self.initcap_period,
+                                  self.allcap_period,
                                   self.brown_50,
                                   self.brown_100,
                                   self.brown_150,
@@ -61,8 +64,7 @@ class TaggerFrame():
                                   self.brown_700,
                                   self.brown_800,
                                   self.brown_900,
-                                  self.brown_1000, 
-                                  self.greater_ave_length
+                                  self.brown_1000
         ]
 
     def read(self, input_filename):
@@ -116,13 +118,13 @@ class TaggerFrame():
                         outf.write("\n")
                 except KeyError:
                     pass
-            template.write("# unigram")
-            for i in range(len(self.feature_functions) + 2): # +2 for default features (word position, word itself)
-                template.write("U%s0:%%x[0,%s]\n" % (str(i), str(i)))
+            #template.write("# unigram")
+            #for i in range(len(self.feature_functions) + 2): # +2 for default features (word position, word itself)
+            #    template.write("U%s0:%%x[0,%s]\n" % (str(i), str(i)))
                 # TODO add up the rest of template in a separate file (bigram, etc)
-            #with open("template_addendum.txt", "r") as temp:
-            #    for line in temp:
-            #        template.write(line)
+            with open("scripts/template_addendum.txt", "r") as temp:
+                for line in temp:
+                    template.write(line)
             
     def get_features(self, train=True):
         """traverse function list and get all values in a dictionary"""
@@ -255,6 +257,18 @@ class TaggerFrame():
                 word_list.append("not_banana")
         return word_list
 
+    def initcap(self):
+        tag = []
+        t = "Initcap"
+        f = "-Initcap"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if w[0].isupper():
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+
     def initcap_period(self):
         tag = []
         t = "InitcapPeriod"
@@ -279,7 +293,18 @@ class TaggerFrame():
                     tag.append(f)
         return tag
 
-            
+    def allcap(self):
+        tag = []
+        t = "Allcap"
+        f = "-Allcap"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if w.isupper():
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+    
     def allcap_period(self):
         tag = []
         t = "AllcapPeriod"
