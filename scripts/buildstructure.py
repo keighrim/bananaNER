@@ -39,6 +39,16 @@ class TaggerFrame():
                                   # fixed: (w_index word pos zone)
                                   self.bias,
                                   self.first_word,
+                                  self.initcap_period,
+                                  self.one_cap(),
+                                  self.allcap_period(),
+                                  self.contain_digit(),
+                                  self.two_digit,
+                                  self.four_digit,
+                                  self.digit_period,
+                                  self.digit_slash,
+                                  self.dollar,
+                                  self.percent,
                                   self.brown_50,
                                   self.brown_100,
                                   self.brown_150,
@@ -133,50 +143,9 @@ class TaggerFrame():
             self.feature_functions.remove(self.biotags)
         return features
 
-    ######################################
-    # currently not used
-    @staticmethod
-    def is_equal(token_list, sentence):
-        compare = lambda a, b: collections.Counter(a) == collections.Counter(b)
-        return compare(token_list, sentence)
-
-    def get_sentence_tags(self, token_list):
-        """using token_list to get the tags """
-        for key in self.database.keys():
-            sentence = self.database[key][0]
-            if self.is_equal(token_list, sentence):
-                return self.database[key]
-        return None
-
-    def get_token_tags(self, token_list):
-        """using token_list to find the token-tag pair"""
-        sentence, tags = self.get_sentence_tags(token_list)
-        l = []
-        for index in range(len(sentence)):
-            l.append((sentence[index], tags[index]))
-        return l
-
-    def output_database(self):
-        """traverse and print all the items in the database"""
-        for key in self.database.keys():
-            print key, self.database[key]
-
-    def add_function(self, function_name):
-        """build up a function list"""
-        self.feature_functions.append(function_name)
-
-    def extract(self):
-        """traverse and execute the list of functions"""
-        for function in self.feature_functions:
-            function()
-
-    # currently not used
-    ########################################
-
-
     def bias(self):
         return ["bias"] * len(self.tokens())
-        
+
     def first_word(self):
         """Checks for each word if it is the first word in a sentence"""
         word_list = []
@@ -187,45 +156,20 @@ class TaggerFrame():
                 word_list.append(t)
                 word_list.extend([f] * (len(sent) - 1))
         return word_list
-    
-    def brown_50(self):
-        return self.brown_cluster(50)
 
-    def brown_100(self):
-        return self.brown_cluster(100)
-
-    def brown_150(self):
-        return self.brown_cluster(150)
-
-    def brown_200(self):
-        return self.brown_cluster(200)
-
-    def brown_250(self):
-        return self.brown_cluster(250)
-
-    def brown_300(self):
-        return self.brown_cluster(300)
-
-    def brown_400(self):
-        return self.brown_cluster(400)
-
-    def brown_500(self):
-        return self.brown_cluster(500)
-
-    def brown_600(self):
-        return self.brown_cluster(600)
-
-    def brown_700(self):
-        return self.brown_cluster(700)
-
-    def brown_800(self):
-        return self.brown_cluster(800)
-
-    def brown_900(self):
-        return self.brown_cluster(900)
-
-    def brown_1000(self):
-        return self.brown_cluster(1000)
+    def brown_50(self): return self.brown_cluster(50)
+    def brown_100(self): return self.brown_cluster(100)
+    def brown_150(self): return self.brown_cluster(150)
+    def brown_200(self): return self.brown_cluster(200)
+    def brown_250(self): return self.brown_cluster(250)
+    def brown_300(self): return self.brown_cluster(300)
+    def brown_400(self): return self.brown_cluster(400)
+    def brown_500(self): return self.brown_cluster(500)
+    def brown_600(self): return self.brown_cluster(600)
+    def brown_700(self): return self.brown_cluster(700)
+    def brown_800(self): return self.brown_cluster(800)
+    def brown_900(self): return self.brown_cluster(900)
+    def brown_1000(self): return self.brown_cluster(1000)
 
     def brown_cluster(self, num):
         """Gives words a feature based on their clusters. Can specify how
@@ -308,6 +252,131 @@ class TaggerFrame():
                 word_list.append("not_banana")
         return word_list
 
+    def initcap_period(self):
+        tag = []
+        t = "InitcapPeriod"
+        f = "-InitcapPeriod"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if w[0].isupper() and w[-1] == '.':
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+
+    def one_cap(self):
+        tag = []
+        t = "OneCap"
+        f = "-OneCap"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if w.isupper() and len(w) == 1:
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+
+            
+    def allcap_period(self):
+        tag = []
+        t = "AllcapPeriod"
+        f = "-AllcapPeriod"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if w.isupper() and w[-1] == ".":
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+    
+    def contain_digit(self):
+        tag = []
+        t = "wDigit"
+        f = "woDigit"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if len(filter(lambda x: x.isdigit(), w[:])) > 1:
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+
+    def two_digit(self):
+        tag = []
+        t = "TwoDigit"
+        f = "-TwoDigit"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if w.isdigit() and len(w) == 2:
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+
+    def four_digit(self):
+        tag = []
+        t = "FourDigit"
+        f = "-FourDigit"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if w.isdigit() and len(w) == 4:
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+
+    def digit_slash(self):
+        tag = []
+        t = "DigitSlash"
+        f = "-DigitSlash"
+        isslash = lambda x: x == "/"
+        is_slash_or_digit = lambda x: x.isdigit() or isslash(x)
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if len(filter(is_slash_or_digit, [c for c in w])) == len(w):
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+
+    def dollar(self):
+        tag = []
+        t = "Dollar"
+        f = "-Dollar"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if "$" in w:
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+
+    def percent(self):
+        tag = []
+        t = "Percent"
+        f = "-Percent"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if "%" in w:
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+
+    def digit_period(self):
+        tag = []
+        t = "DigitPeriod"
+        f = "-DigitPeriod"
+        isperiod = lambda x: x == "."
+        is_slash_or_digit = lambda x: x.isdigit() or isperiod(x)
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if len(filter(is_slash_or_digit, [c for c in w])) == len(w):
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+        
 class NamedEntityRecognizer(object):
     """
     NER class is a classifier to detect named entities 
