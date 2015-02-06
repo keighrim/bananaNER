@@ -37,70 +37,66 @@ class TaggerFrame():
         # 1. take no parameters
         # (use self.sentences and self.tokens())
         # 2. return a list or an iterable which has len of # number of tokens
-        self.feature_functions = [self.postags,
-                                  self.zone,
-                                  # let's stick to these few first functions
-                                  # so that we can stabilize template file
-                                  # fixed: (w_index word pos zone)
-                                  self.bias,
-                                  self.first_word,
-                                  self.initcap,
-                                  self.one_cap,
-                                  self.allcap,
-                                  self.contain_digit,
-                                  self.two_digit,
-                                  self.four_digit,
-                                  self.digit_period,
-                                  self.digit_slash,
-                                  self.dollar,
-                                  self.percent,
-                                  self.greater_ave_length,
-                                  self.initcap_period,
-                                  self.allcap_period,
-                                  self.brown_50,
-                                  self.brown_100,
-                                  self.brown_150,
-                                  self.brown_200,
-                                  self.brown_250,
-                                  self.brown_300,
-                                  self.brown_400,
-                                  self.brown_500,
-                                  self.brown_600,
-                                  self.brown_700,
-                                  self.brown_800,
-                                  self.brown_900,
-                                  self.brown_1000,
-                                  self.hyphen,
-                                  self.term_freq,
-                                  self.docu_freq,
-                                  self.ctf_50,
-                                  self.ctf_100,
-                                  self.ctf_150,
-                                  self.ctf_200,
-                                  self.ctf_250,
-                                  self.ctf_300,
-                                  self.ctf_400,
-                                  self.ctf_500,
-                                  self.ctf_600,
-                                  self.ctf_700,
-                                  self.ctf_800,
-                                  self.ctf_900,
-                                  self.ctf_1000,
-                                  self.cdf_50,
-                                  self.cdf_100,
-                                  self.cdf_150,
-                                  self.cdf_200,
-                                  self.cdf_250,
-                                  self.cdf_300,
-                                  self.cdf_400,
-                                  self.cdf_500,
-                                  self.cdf_600,
-                                  self.cdf_700,
-                                  self.cdf_800,
-                                  self.cdf_900,
-                                  self.cdf_1000,
-                                  self.seq_caps
-                                  
+        self.feature_functions = [self.postags, #2
+                                  self.zone,  #3
+                                  self.bias,  #4
+                                  self.first_word,  #5
+                                  self.initcap, #6
+                                  self.one_cap, #7
+                                  self.allcap,  #8
+                                  self.contain_digit, #9
+                                  self.two_digit, #10
+                                  self.four_digit,  #11
+                                  self.digit_period,  #12
+                                  self.digit_slash, #13
+                                  self.dollar,  #14
+                                  self.percent, #15
+                                  self.greater_ave_length,  #16
+                                  self.initcap_period,  #17
+                                  self.allcap_period, #18
+                                  self.brown_50,  #19
+                                  self.brown_100, #20
+                                  self.brown_150, #21
+                                  self.brown_200, #22
+                                  self.brown_250, #23
+                                  self.brown_300, #24
+                                  self.brown_400, #25
+                                  self.brown_500, #26
+                                  self.brown_600, #27
+                                  self.brown_700, #28
+                                  self.brown_800, #29
+                                  self.brown_900, #30
+                                  self.brown_1000,  #31
+                                  self.hyphen,  #32
+                                  self.term_freq, #33
+                                  self.docu_freq, #34
+                                  self.ctf_50,  #35
+                                  self.ctf_100, #36
+                                  self.ctf_150, #37
+                                  self.ctf_200, #38
+                                  self.ctf_250, #39
+                                  self.ctf_300, #40
+                                  self.ctf_400, #41
+                                  self.ctf_500, #42
+                                  self.ctf_600, #43
+                                  self.ctf_700, #44
+                                  self.ctf_800, #45
+                                  self.ctf_900, #46
+                                  self.ctf_1000,  #47
+                                  self.cdf_50,  #48
+                                  self.cdf_100, #49
+                                  self.cdf_150, #50
+                                  self.cdf_200, #51
+                                  self.cdf_250, #52
+                                  self.cdf_300, #53
+                                  self.cdf_400, #54
+                                  self.cdf_500, #55
+                                  self.cdf_600, #56
+                                  self.cdf_700, #57
+                                  self.cdf_800, #58
+                                  self.cdf_900, #59
+                                  self.cdf_1000,  #60
+                                  self.seq_caps #61
         ]
 
     def read(self, input_filename):
