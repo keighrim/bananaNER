@@ -167,7 +167,7 @@ U300:%x[0,30]
 # More Unigram features
 #U320:%x[0,32]
 #U330:%x[0,33]
-#U340:%x[0,34]
+U340:%x[0,34]
 
 # ctf
 #U350:%x[0,35]
@@ -200,4 +200,14 @@ U300:%x[0,30]
 #U600:%x[0,60]
 
 # More Unigram features
-#U610:%x[0,61]
+U610:%x[0,61]
+
+# dict unigram features
+U620:%x[0,62]
+U630:%x[0,63]
+U640:%x[0,64]
+U650:%x[0,65]
+
+# is suffix coming?
+U660:%x[0,66]
+
