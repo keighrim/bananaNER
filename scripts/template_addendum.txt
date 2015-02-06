@@ -61,6 +61,11 @@
 # 59 = 900
 # 60 = 1000
 # 61 = seq_caps
+# 62 = dict_geo
+# 63 = dict_person
+# 64 = dict_org
+# 65 = dict_other
+# 66 = prox_org_stuff
 
 
 # first_word, POS
