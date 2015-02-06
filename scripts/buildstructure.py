@@ -64,7 +64,8 @@ class TaggerFrame():
                                   self.brown_700,
                                   self.brown_800,
                                   self.brown_900,
-                                  self.brown_1000
+                                  self.brown_1000,
+                                  self.hyphen
         ]
 
     def read(self, input_filename):
@@ -383,6 +384,18 @@ class TaggerFrame():
         tag = []
         t = "Percent"
         f = "-Percent"
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                if "%" in w:
+                    tag.append(t)
+                else:
+                    tag.append(f)
+        return tag
+        
+    def hyphen(self):
+        tag = []
+        t = "Hyphen"
+        f = "-Hyphen"
         for sent in self.sentences:
             for w, _, _ in sent:
                 if "%" in w:
