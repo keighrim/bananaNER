@@ -13,7 +13,6 @@ import sys
 __author__ = ""
 __email__ = ""
 
-import collections
 import os
 
 CURPATH = os.getcwd()
@@ -27,6 +26,12 @@ class TaggerFrame():
         # sentences is a list of triples [(word, postag, biotag)]
         # if bio is not given (raw file) third elements are empty strings
         self.sentences = None
+
+        # df and tf is frequency counts, document freq, term freq, respectively
+        self.df = {}
+        self.tf = {}
+        self.cdf = {}
+        self.ctf = {}
 
         # all feature_functions should
         # 1. take no parameters
@@ -65,7 +70,37 @@ class TaggerFrame():
                                   self.brown_800,
                                   self.brown_900,
                                   self.brown_1000,
-                                  self.hyphen
+                                  self.hyphen,
+                                  self.term_freq,
+                                  self.docu_freq,
+                                  self.ctf_50,
+                                  self.ctf_100,
+                                  self.ctf_150,
+                                  self.ctf_200,
+                                  self.ctf_250,
+                                  self.ctf_300,
+                                  self.ctf_400,
+                                  self.ctf_500,
+                                  self.ctf_600,
+                                  self.ctf_700,
+                                  self.ctf_800,
+                                  self.ctf_900,
+                                  self.ctf_1000,
+                                  self.cdf_50,
+                                  self.cdf_100,
+                                  self.cdf_150,
+                                  self.cdf_200,
+                                  self.cdf_250,
+                                  self.cdf_300,
+                                  self.cdf_400,
+                                  self.cdf_500,
+                                  self.cdf_600,
+                                  self.cdf_700,
+                                  self.cdf_800,
+                                  self.cdf_900,
+                                  self.cdf_1000,
+                                  self.seq_caps
+                                  
         ]
 
     def read(self, input_filename):
@@ -89,6 +124,133 @@ class TaggerFrame():
                                          line.split("\t")[2].strip(), ""))
                     prev_empty = False
         self.sentences = sentences
+        self.populate_freq(300)
+        self.populate_dict()
+
+    def populate_freq(self, cluster_size):
+        with open("scripts/c%i_document.freq" % cluster_size) as cdf, open("scripts/c%i_term.freq" % cluster_size) as ctf, open("scripts/document.freq") as df,  open("scripts/term.freq") as tf:
+            self.cdf = self.read_freq(cdf)
+            self.ctf = self.read_freq(ctf)
+            self.df = self.read_freq(df)
+            self.tf = self.read_freq(tf)
+        
+    @staticmethod
+    def read_freq(freq_file):
+        freq = {}
+        for line in freq_file:
+            freq[line.split("\t")[0]] = int(line.split("\t")[1].strip())
+        return freq
+    
+    def freq_rank(self, freq_dict):
+        sorted_freq \
+            = sorted(set([f for _, f in freq_dict.iteritems()]), reverse=True)
+        how_freq = {}
+        for freq in sorted_freq[:len(sorted_freq)/4]:
+            how_freq[freq] = "High"
+        for freq in sorted_freq[len(sorted_freq)/4:len(sorted_freq)/2]:
+            how_freq[freq] = "Mid"
+        for freq in sorted_freq[len(sorted_freq)/2:]:
+            how_freq[freq] = "Low"
+        return how_freq
+        
+    def docu_freq(self):
+        tag = []
+        s = "DocuFreq="
+        f_rank = self.freq_rank(self.df)
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                try:
+                    tag.append(s + f_rank[self.df[w.lower()]])
+                except KeyError:
+                    tag.append(s + "OOV")
+        return tag
+
+    def term_freq(self):
+        tag = []
+        s = "TermFreq="
+        f_rank = self.freq_rank(self.tf)
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                try:
+                    tag.append(s + f_rank[self.tf[w.lower()]])
+                except KeyError:
+                    tag.append(s + "OOV")
+        return tag
+    
+    def cdf_50(self): return self.cluster_docu_freq(50)
+    def cdf_100(self): return self.cluster_docu_freq(100)
+    def cdf_150(self): return self.cluster_docu_freq(150)
+    def cdf_200(self): return self.cluster_docu_freq(200)
+    def cdf_250(self): return self.cluster_docu_freq(250)
+    def cdf_300(self): return self.cluster_docu_freq(300)
+    def cdf_400(self): return self.cluster_docu_freq(400)
+    def cdf_500(self): return self.cluster_docu_freq(500)
+    def cdf_600(self): return self.cluster_docu_freq(600)
+    def cdf_700(self): return self.cluster_docu_freq(700)
+    def cdf_800(self): return self.cluster_docu_freq(800)
+    def cdf_900(self): return self.cluster_docu_freq(900)
+    def cdf_1000(self): return self.cluster_docu_freq(1000)
+
+    def cluster_docu_freq(self, cluster_size):
+        self.populate_freq(cluster_size)
+        cluster_path = os.path.join(
+            PROJECT_PATH, 'dataset', 'clusters', 'paths_' + str(cluster_size))
+        cluster_dict = {}
+        with open(cluster_path) as cluster_file:
+            for line in cluster_file:
+                cluster, word, _ = line.split('\t')
+                cluster_dict[word] = cluster
+
+        tag = []
+        s = "C%iDocuFreq=" % cluster_size
+        f_rank = self.freq_rank(self.cdf)
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                try: 
+                    tag.append(s + f_rank[self.cdf[cluster_dict[w]]])
+                except KeyError:
+                    tag.append(s + "OOV")
+        return tag
+
+    def ctf_50(self): return self.cluster_term_freq(50)
+    def ctf_100(self): return self.cluster_term_freq(100)
+    def ctf_150(self): return self.cluster_term_freq(150)
+    def ctf_200(self): return self.cluster_term_freq(200)
+    def ctf_250(self): return self.cluster_term_freq(250)
+    def ctf_300(self): return self.cluster_term_freq(300)
+    def ctf_400(self): return self.cluster_term_freq(400)
+    def ctf_500(self): return self.cluster_term_freq(500)
+    def ctf_600(self): return self.cluster_term_freq(600)
+    def ctf_700(self): return self.cluster_term_freq(700)
+    def ctf_800(self): return self.cluster_term_freq(800)
+    def ctf_900(self): return self.cluster_term_freq(900)
+    def ctf_1000(self): return self.cluster_term_freq(900)
+    
+    def cluster_term_freq(self, cluster_size):
+        self.populate_freq(cluster_size)
+        cluster_path = os.path.join(
+            PROJECT_PATH, 'dataset', 'clusters', 'paths_' + str(cluster_size))
+        cluster_dict = {}
+        with open(cluster_path) as cluster_file:
+            for line in cluster_file:
+                cluster, word, _ = line.split('\t')
+                cluster_dict[word] = cluster
+
+        tag = []
+        s = "C%iTermFreq=" % cluster_size
+        f_rank = self.freq_rank(self.ctf)
+        for sent in self.sentences:
+            for w, _, _ in sent:
+                try: 
+                    tag.append(s + f_rank[self.ctf[cluster_dict[w]]])
+                except KeyError:
+                    tag.append(s + "OOV")
+        return tag
+
+
+    def populate_dict(self):
+        # TODO write this method; need to decide how we store dictionary files
+        pass
 
     def tokens(self):
         """Return a list of all tokens with their index in the sent they're belong"""
@@ -417,6 +579,31 @@ class TaggerFrame():
                 else:
                     tag.append(f)
         return tag
+    
+    def seq_caps(self):
+        tag = []
+        t = "SeqInit"
+        f = "-SeqInit"
+        initcap = lambda x: len(x) > 2 and x[0].isupper()
+        for sent in self.sentences:
+            words = [w for w, _, _ in sent]
+            for i in range(len(words)):
+                if len(words) < 2:
+                    tag.append(f)
+                elif i == 0 and len(filter(initcap, (words[i], words[i+1]))) == 2:
+                    tag.append(t)
+                elif i == len(words) - 1 and len(filter(initcap, (words[i-1], words[i]))) == 2:
+                    tag.append(t)
+                else:
+                    try:
+                        if len(filter(initcap, (words[i-1], words[i], words[i+1]))) == 3:
+                            tag.append(t)
+                        else:
+                            tag.append(f)
+                    except IndexError:
+                        tag.append(f)
+                    initcap(words[i-1]) and initcap([words[i]])
+        return tag
         
 class NamedEntityRecognizer(object):
     """
@@ -440,7 +627,7 @@ class NamedEntityRecognizer(object):
             self.crfppc \
                 = os.path.join("crfpp_win", 'crf_test')
         else:
-            # TODO modify path and exec file name
+            # TODO modify path and exec file names for mac/linux
             self.crfppl \
                 = os.path.join("..", 'crfpp_win')
             self.crfppc \
