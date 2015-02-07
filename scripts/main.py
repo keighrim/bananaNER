@@ -3,7 +3,7 @@
 
 """
 This program is to:
-WRITE SOMETHING
+
 
 CS137B, programming assignment #1, Spring 2015
 """
@@ -23,8 +23,8 @@ FREQ_PATH = os.path.join(RES_PATH, "freqCounts")
 CLUSTER_PATH = os.path.join(RES_PATH, "clusters")
 
 
-class TaggerFrame():
-    """TaggerFrame is a framework for tagging tokens from data file"""
+class FeatureTagger():
+    """FeatureTagger is a framework for tagging tokens from data file"""
 
     def __init__(self):
         # sentences is a list of triples [(word, postag, biotag)]
@@ -109,7 +109,7 @@ class TaggerFrame():
                                   self.dict_person, #63
                                   self.dict_org,    #64
                                   self.dict_other,    #65
-                                  self.prox_org_suff, #66
+                                  self.prox_org_suff #66
         ]
 
     def read(self, input_filename):
@@ -160,7 +160,8 @@ class TaggerFrame():
             freq[line.split("\t")[0]] = int(line.split("\t")[1].strip())
         return freq
 
-    def freq_rank(self, freq_dict):
+    @staticmethod
+    def freq_rank(freq_dict):
         """
         grade frequency counts with three ranks
         top 25% get 'High'
@@ -222,6 +223,8 @@ class TaggerFrame():
     def cdf_1000(self): return self.cluster_docu_freq(1000)
 
     def cluster_docu_freq(self, cluster_size):
+        """given cluster granularity,
+         replace words into cluster representation and return its document frequency"""
         self.populate_freq(cluster_size)
         cluster_path = os.path.join(
             CLUSTER_PATH, 'paths_' + str(cluster_size))
@@ -230,7 +233,6 @@ class TaggerFrame():
             for line in cluster_file:
                 cluster, word, _ = line.split('\t')
                 cluster_dict[word] = cluster
-
         tag = []
         s = "C%iDocuFreq=" % cluster_size
         f_rank = self.freq_rank(self.cdf)
@@ -258,6 +260,8 @@ class TaggerFrame():
     def ctf_1000(self): return self.cluster_term_freq(900)
 
     def cluster_term_freq(self, cluster_size):
+        """given cluster granularity,
+         replace words into cluster representation and return its term frequency"""
         self.populate_freq(cluster_size)
         cluster_path = os.path.join(
             CLUSTER_PATH, 'paths_' + str(cluster_size))
@@ -334,10 +338,12 @@ class TaggerFrame():
         return features
 
     def bias(self):
+        """feature function: dummy bias feature that gives 1 to all tokens"""
         return ["bias"] * len(self.tokens())
 
     def first_word(self):
-        """feature functin: Checks for each word if it is the first word in a sentence"""
+        """feature functin: 
+        Checks for each word if it is the first word in a sentence"""
         word_list = []
         t = "first_word"
         f = "-first_word"
@@ -444,6 +450,7 @@ class TaggerFrame():
         return word_list
 
     def initcap(self):
+        """feature function: check if a token starts with capital letter"""
         tag = []
         t = "Initcap"
         f = "-Initcap"
@@ -456,6 +463,8 @@ class TaggerFrame():
         return tag
 
     def initcap_period(self):
+        """feature function: 
+        check if a token starts with capital letter and ends with a period"""
         tag = []
         t = "InitcapPeriod"
         f = "-InitcapPeriod"
@@ -468,6 +477,7 @@ class TaggerFrame():
         return tag
 
     def one_cap(self):
+        """feature function: check if a token consists of only 1 capital letter"""
         tag = []
         t = "OneCap"
         f = "-OneCap"
@@ -480,6 +490,7 @@ class TaggerFrame():
         return tag
 
     def allcap(self):
+        """feature function: see if a token consists of all capital letters"""
         tag = []
         t = "Allcap"
         f = "-Allcap"
@@ -492,6 +503,8 @@ class TaggerFrame():
         return tag
 
     def allcap_period(self):
+        """feature function:
+        see if a token consists of all capital letters and ends with a period"""
         tag = []
         t = "AllcapPeriod"
         f = "-AllcapPeriod"
@@ -504,6 +517,7 @@ class TaggerFrame():
         return tag
 
     def contain_digit(self):
+        """feature function: check if a token contains one or more digits"""
         tag = []
         t = "wDigit"
         f = "woDigit"
@@ -516,6 +530,7 @@ class TaggerFrame():
         return tag
 
     def two_digit(self):
+        """feature funtion: check if a token consists of only two digits"""
         tag = []
         t = "TwoDigit"
         f = "-TwoDigit"
@@ -528,6 +543,7 @@ class TaggerFrame():
         return tag
 
     def four_digit(self):
+        """feature funtion: check if a token consists of only four digits"""
         tag = []
         t = "FourDigit"
         f = "-FourDigit"
@@ -540,6 +556,7 @@ class TaggerFrame():
         return tag
 
     def digit_slash(self):
+        """feature function: check if a token consists of only digits and slahes"""
         tag = []
         t = "DigitSlash"
         f = "-DigitSlash"
@@ -554,6 +571,7 @@ class TaggerFrame():
         return tag
 
     def dollar(self):
+        """feature function: check a dollar symbol is in a token"""
         tag = []
         t = "Dollar"
         f = "-Dollar"
@@ -566,6 +584,7 @@ class TaggerFrame():
         return tag
 
     def percent(self):
+        """feature function: check a percent symbol is in a token"""
         tag = []
         t = "Percent"
         f = "-Percent"
@@ -578,6 +597,7 @@ class TaggerFrame():
         return tag
 
     def hyphen(self):
+        """feature function: check is a token is hyphenated one"""
         tag = []
         t = "Hyphen"
         f = "-Hyphen"
@@ -590,6 +610,7 @@ class TaggerFrame():
         return tag
 
     def digit_period(self):
+        """feature function: check if a token consists of only digits and periods"""
         tag = []
         t = "DigitPeriod"
         f = "-DigitPeriod"
@@ -604,6 +625,8 @@ class TaggerFrame():
         return tag
 
     def seq_caps(self):
+        """feature function: 
+        return true only when previous, current and next tokens are all init_cap"""
         tag = []
         t = "SeqInit"
         f = "-SeqInit"
@@ -704,7 +727,7 @@ class NamedEntityRecognizer(object):
     def __init__(self):
         super(NamedEntityRecognizer, self).__init__()
         os.chdir(PROJECT_PATH)
-        self.fe = TaggerFrame()
+        self.ft = FeatureTagger()
         self.trainfile \
             = os.path.join('result', 'trainFeatureVector.txt')
         self.targetfile\
@@ -716,15 +739,16 @@ class NamedEntityRecognizer(object):
             self.crfppc \
                 = os.path.join("crfpp_win", 'crf_test')
         else:
-            # TODO modify path and exec file names for mac/linux
+            # TODO modify paths and exec file names for mac/linux
             self.crfppl \
                 = os.path.join("..", 'crfpp_win')
             self.crfppc \
                 = os.path.join("..", 'crfpp_win', 'crf_test')
 
     def train(self, train_fn):
-        self.fe.read(train_fn)
-        self.fe.feature_matrix(self.trainfile)
+        """train crf++ module with a given data file"""
+        self.ft.read(train_fn)
+        self.ft.feature_matrix(self.trainfile)
         modelfile = os.path.join("result", "model")
         templatefile = os.path.join("result", "template")
         if self.windows:
@@ -734,12 +758,16 @@ class NamedEntityRecognizer(object):
             # TODO something for linux/mac
             command = ""
             pass
+        # TODO change this to use subprocess module
         os.system(command)
 
     def classify(self, target_fn):
-        self.fe.read(target_fn)
-        self.fe.feature_matrix(self.targetfile, False)
+        """Run crfpp classifier to classify target file"""
+        self.ft.read(target_fn)
+        self.ft.feature_matrix(self.targetfile, False)
         modelfile = os.path.join("result", "model")
+        if not os.path.isfile(modelfile):
+            raise Exception("Model not found.")
         resultfile = os.path.join("result", "result.txt")
         if self.windows:
             os.system('del "' + resultfile + '"')
@@ -750,6 +778,7 @@ class NamedEntityRecognizer(object):
             # TODO something for linux/mac
             command = ""
             pass
+        # TODO change this to use subprocess module
         os.system(command)
 
 
@@ -764,7 +793,8 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         "-t",
-        help="name of target file, if not given, program will ask users after training",
+        help=
+        "name of target file, if not given, program will ask users after training",
         default=None
     )
     args = parser.parse_args()
@@ -773,9 +803,10 @@ if __name__ == '__main__':
     ner.train(args.i)
     if args.t is None:
         try:
-            target = str(input(
-                "enter a test file name with its path\n \
-                (relative or full, default: dataset/dev.raw): "))
+            target = input(
+                "enter a test file name with its path\n" 
+                + "(relative or full, default: dataset/dev.raw): ")
+        # if imput is empty
         except SyntaxError:
             target = "dataset/dev.raw"
     else:
@@ -784,7 +815,7 @@ if __name__ == '__main__':
 
     # run eval code
     testfile = target.split("/")[-1].split(".")[0]
+    # TODO change to subprocess module
     os.system(
         'python scripts/evaluate-head.py "dataset/%s.gold" "result/result.txt"'
         % testfile)
-

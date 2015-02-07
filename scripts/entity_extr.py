@@ -83,6 +83,6 @@ def find_entities(sents):
         
 if __name__ == '__main__':
     # tempted to use all.gold...
-    find_entities(read("../dataset/all.gold"))
+    find_entities(read("../dataset/train.gold"))
             
 
