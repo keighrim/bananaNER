@@ -1,5 +1,12 @@
 # /usr/bin/python
 # -*- coding: utf-8 -*-
+
+"""
+This program is to
+extract named entities from an annotated data file
+
+CS137B, programming assignment #1, Spring 2015
+"""
 import sys
 
 reload(sys)
@@ -9,9 +16,6 @@ __author__ = 'krim'
 __date__ = '2/6/2015'
 __email__ = 'krim@brandeis.edu'
 
-"""
-This program is to
-"""
 
 def read(input_filename):
     """load sentences from data file"""
@@ -36,6 +40,8 @@ def read(input_filename):
     return sentences
 
 def find_entities(sents):
+    
+    # we'll use 4 dictionaries; ORG, GEO, PERSON, OTHER
     org = []
     geo = []
     other = []
@@ -49,11 +55,13 @@ def find_entities(sents):
             except IndexError:
                 bio = "O"
                 typ = ""
+            # for person names, do not concatenate
             if typ == "PER":
                 if len(entity) > 0:
                     cur.append(entity)
                     entity = ""
                 person.append(w)
+            # else, keep track of "I" tagged words and concatenate
             else:
                 if bio == "B":
                     if len(entity) > 0:
@@ -71,7 +79,11 @@ def find_entities(sents):
                     if len(entity) > 0:
                         cur.append(entity)
                         entity = ""
-    with  open("org.extr", "w") as orgf, open("other.extr", "w") as otherf, open("person.extr", "w") as personf, open("geo.extr", "w") as geof:
+    # write out lists to coresponding files
+    with open("org.extr", "w") as orgf, \
+            open("other.extr", "w") as otherf, \
+            open("person.extr", "w") as personf, \
+            open("geo.extr", "w") as geof:
         for o in org:
             orgf.write(o + "\n")
         for ot in other:
@@ -84,5 +96,4 @@ def find_entities(sents):
 if __name__ == '__main__':
     # tempted to use all.gold...
     find_entities(read("../dataset/train.gold"))
-            
 

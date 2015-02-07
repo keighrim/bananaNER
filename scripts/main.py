@@ -3,7 +3,7 @@
 
 """
 This program is to:
-
+WRITE SOMETHING
 
 CS137B, programming assignment #1, Spring 2015
 """
@@ -11,7 +11,8 @@ import re
 import sys
 
 __author__ = ["Keigh Rim", "Todd Curcuru", "Yalin Liu"]
-__date__ = "2/6/2015"
+__date__ = "2/1/2015"
+__email__ = ['krim@brandeis.edu', 'tcurcuru@brandeis.edu', 'yalin@brandeis.edu']
 
 import os
 

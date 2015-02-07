@@ -1,5 +1,12 @@
 # /usr/bin/python
 # -*- coding: utf-8 -*-
+
+"""
+This program is to:
+count frequencies of terms and their brown numbers
+
+CS137B, programming assignment #1, Spring 2015
+"""
 import re
 import sys
 import operator
@@ -11,10 +18,6 @@ __author__ = 'krim'
 __date__ = '2/5/2015'
 __email__ = 'krim@brandeis.edu'
 
-"""
-This program is to:
-count frequencies of terms and their brown numbers
-"""
 
 def count_frequencies(input_filename):
     """Count document frequency of each word's cluster number(words not lowered)"""
@@ -94,7 +97,7 @@ def count_cluster_frequencies(input_filename, cluster_size):
         sentences.append(tokens)
         documents.append(sentences)
 
-        # then read up cluster file and count term freq (tf is in cluster file)
+        # then read up cluster file and count term freq (tf already in cluster file)
         cluster_file = "../dataset/clusters/paths_" + str(cluster_size)
         cluster_dict = {}
         cluster_tf_count = {}

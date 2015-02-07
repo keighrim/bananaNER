@@ -1,5 +1,12 @@
 # /usr/bin/python
 # -*- coding: utf-8 -*-
+
+"""
+This program is to:
+extract useful suffixes from a dictionary of names
+
+CS137B, programming assignment #1, Spring 2015
+"""
 import sys
 import operator
 
@@ -9,11 +16,6 @@ sys.setdefaultencoding('utf8')
 __author__ = 'krim'
 __date__ = '2/6/2015'
 __email__ = 'krim@brandeis.edu'
-
-"""
-This program is to:
-extract useful suffixes from a dictiory of names
-"""
 
 def get_suffix(dict_type):
     suffix = {}
