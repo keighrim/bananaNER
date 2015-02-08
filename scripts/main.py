@@ -9,6 +9,7 @@ CS137B, programming assignment #1, Spring 2015
 """
 import re
 import sys
+import subprocess
 
 __author__ = ["Keigh Rim", "Todd Curcuru", "Yalin Liu"]
 __date__ = "2/1/2015"
@@ -119,7 +120,7 @@ class FeatureTagger():
         sentence = []
         with open(input_filename) as in_file:
             for line in in_file:
-                if line == "\n":
+                if re.search(r"^\s+$", line):
                     if not prev_empty:
                         sentences.append(sentence)
                         sentence = []
@@ -735,16 +736,13 @@ class NamedEntityRecognizer(object):
             = os.path.join('result', 'targetFeatureVector.txt')
         self.windows = sys.platform.startswith("win")
         if self.windows:
-            self.crfppl \
-                = os.path.join("crfpp_win", 'crf_learn')
-            self.crfppc \
-                = os.path.join("crfpp_win", 'crf_test')
+            crf_path = "crfpp_win"
         else:
-            # TODO modify paths and exec file names for mac/linux
-            self.crfppl \
-                = os.path.join("..", 'crfpp_win')
-            self.crfppc \
-                = os.path.join("..", 'crfpp_win', 'crf_test')
+            crf_path = "crfpp"
+        self.crfppl \
+            = os.path.join(crf_path, 'crf_learn')
+        self.crfppc \
+            = os.path.join(crf_path, 'crf_test')
 
     def train(self, train_fn):
         """train crf++ module with a given data file"""
@@ -752,15 +750,8 @@ class NamedEntityRecognizer(object):
         self.ft.feature_matrix(self.trainfile)
         modelfile = os.path.join("result", "model")
         templatefile = os.path.join("result", "template")
-        if self.windows:
-            command = r'%s "%s" "%s" "%s"' %\
-                      (self.crfppl, templatefile, self.trainfile, modelfile)
-        else:
-            # TODO something for linux/mac
-            command = ""
-            pass
-        # TODO change this to use subprocess module
-        os.system(command)
+        subprocess.check_call(
+            [self.crfppl, templatefile, self.trainfile, modelfile])
 
     def classify(self, target_fn):
         """Run crfpp classifier to classify target file"""
@@ -770,18 +761,18 @@ class NamedEntityRecognizer(object):
         if not os.path.isfile(modelfile):
             raise Exception("Model not found.")
         resultfile = os.path.join("result", "result.txt")
-        if self.windows:
-            os.system('del "' + resultfile + '"')
-            command = r'%s -m "%s" "%s" >> "%s"' % \
-                      (self.crfppc, modelfile, self.targetfile, resultfile)
-        else:
-            os.system('rm "' + resultfile + '"')
-            # TODO something for linux/mac
-            command = ""
-            pass
-        # TODO change this to use subprocess module
-        os.system(command)
 
+        crfppc = subprocess.Popen([self.crfppc, "-m", modelfile, self.targetfile],
+                                stdout=subprocess.PIPE)
+        with open(resultfile, "w") as outf:
+            for line in crfppc.communicate()[0]:
+                outf.write(line)
+
+        # evaluate the result
+        target_name = target_fn.split("/")[-1].split(".")[0]
+        subprocess.check_call(
+            ["python", "scripts/evaluate-head.py",
+             "dataset/%s.gold" % target_name, resultfile])
 
 if __name__ == '__main__':
     import argparse
@@ -813,10 +804,3 @@ if __name__ == '__main__':
     else:
         target = args.t
     ner.classify(target)
-
-    # run eval code
-    testfile = target.split("/")[-1].split(".")[0]
-    # TODO change to subprocess module
-    os.system(
-        'python scripts/evaluate-head.py "dataset/%s.gold" "result/result.txt"'
-        % testfile)

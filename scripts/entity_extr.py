@@ -23,7 +23,7 @@ def read(input_filename):
     sentence = []
     with open(input_filename) as in_file:
         for line in in_file:
-            if line == "\n":
+            if re.search(r"^\s+$", line):
                 if not prev_empty:
                     sentences.append(sentence)
                     sentence = []

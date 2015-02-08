@@ -7,6 +7,7 @@ reconstruct sentences from a given data file
 
 CS137B, programming assignment #1, Spring 2015
 """
+import re
 
 __author__ = 'Keigh Rim'
 __date__ = '2/1/2015'
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     tags = ""
     with open(path+args.i) as in_file, open("../" + args.o, 'w') as out_file:
         for line in in_file:
-            if line == "\n":
+            if re.search(r"^\s+$", line):
                 sent += "\n"
                 tags += "\n"
                 out_file.write(sent)

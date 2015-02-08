@@ -28,7 +28,7 @@ def count_frequencies(input_filename):
     # first read up data file (again but ina different format)
     with open(input_filename) as data:
         for line in data:
-            if line == "\n":
+            if re.search(r"^\s+$", line):
                 if len(tokens) > 0:
                     sentences.append(tokens)
                     tokens = []
